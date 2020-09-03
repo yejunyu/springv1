@@ -22,4 +22,3 @@
 2. 匹配 HandlerMapping > 从 request 对象中获得用户输入的 url,找到其对应的 Method
 3. 反射调用 method.invoker() > 利用反射调用方法返回结果
 4. response.getWrite().write() > 将返回结果输出到浏览器
-
