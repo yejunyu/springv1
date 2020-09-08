@@ -95,10 +95,16 @@ public class MyDispatcherServlet extends HttpServlet {
                         beanName = service.value();
                     }
                     // 如果 service 是接口,则取出所有实现类
-
+                    // @autowire IService service 但是如果这个接口有多个实现类那就找不到是哪个了
+                    for (Class<?> i : aClass.getInterfaces()) {
+                        beanName = i.getSimpleName();
+                        if (ioc.containsKey(beanName)) {
+                            throw new Exception("the beanName is exists!");
+                        }
+                    }
                     ioc.put(beanName, aClass.newInstance());
                 } else {
-
+                    continue;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
