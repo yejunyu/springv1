@@ -8,9 +8,9 @@ import java.lang.annotation.*;
  * @email: yyyejunyu@gmail.com
  * @date: 2020/9/6
  */
-@Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface YAutowired {
+public @interface YComponent {
     String value() default "";
 }
