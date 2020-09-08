@@ -59,7 +59,7 @@ public class MyDispatcherServlet extends HttpServlet {
         doInstance();
 
         // 4. 完成依赖注入
-        doAutowirted();
+        doAutowire();
 
         // 5. 初始化 HandlerMapping
         doInitHandlerMapping();
@@ -71,8 +71,13 @@ public class MyDispatcherServlet extends HttpServlet {
 
     }
 
-    private void doAutowirted() {
-
+    private void doAutowire() {
+        if (ioc.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, Object> entry : ioc.entrySet()) {
+            
+        }
     }
 
     private void doInstance() {
