@@ -22,3 +22,12 @@
 2. 匹配 HandlerMapping > 从 request 对象中获得用户输入的 url,找到其对应的 Method
 3. 反射调用 method.invoker() > 利用反射调用方法返回结果
 4. response.getWrite().write() > 将返回结果输出到浏览器
+
+### 使用方式有两种
+1. application.properties里定义扫描包
+2. 通过配置类来读取配置定义扫描包
+例如:
+```
+AnnotationConfigWebApplicationContext ctx1 = new AnnotationConfigWebApplicationContext();
+Object bean = ctx1.getBean("");
+```
