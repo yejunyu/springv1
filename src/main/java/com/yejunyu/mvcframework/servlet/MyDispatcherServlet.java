@@ -1,9 +1,6 @@
 package com.yejunyu.mvcframework.servlet;
 
-import com.yejunyu.mvcframework.annotation.YAutowire;
-import com.yejunyu.mvcframework.annotation.YController;
-import com.yejunyu.mvcframework.annotation.YRequestMapping;
-import com.yejunyu.mvcframework.annotation.YService;
+import com.yejunyu.mvcframework.annotation.*;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServlet;
@@ -12,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -61,6 +59,7 @@ public class MyDispatcherServlet extends HttpServlet {
         String contextPath = req.getContextPath();
         System.out.println("url is :" + url + " contextPath is :" + contextPath);
         url = ("/" + url).replaceAll(contextPath, "").replaceAll("/+", "");
+        Map<String, String[]> parameterMap = req.getParameterMap();
         Method method = handlerMapping.get(url);
         if (method == null) {
             resp.getWriter().write("404 NOT FOUND!");
@@ -70,7 +69,29 @@ public class MyDispatcherServlet extends HttpServlet {
         Class<?>[] parameterTypes = method.getParameterTypes();
         // 实参
         Object[] objects = new Object[parameterTypes.length];
-
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> parameterType = parameterTypes[i];
+            if (parameterType == HttpServletRequest.class) {
+                objects[i] = req;
+            } else if (parameterType == HttpServletResponse.class) {
+                objects[i] = resp;
+            } else if (parameterType == String.class) {
+                Annotation[][] annotations = method.getParameterAnnotations();
+                for (Annotation a : annotations[i]) {
+                    if (a instanceof YRequestParam) {
+                        String paramName = ((YRequestParam) a).value();
+                        if (!"".equals(paramName)) {
+                            // param 是用数组形式呈现的
+                            String value = Arrays.toString(parameterMap.get(paramName));
+                            objects[i] = value;
+                        }
+                    }
+                }
+            } else {
+                // todo 其他类型的参数
+                objects[i] = null;
+            }
+        }
         // 拿出 method 的类名
         String beanName = method.getDeclaringClass().getSimpleName();
         method.invoke(ioc.get(beanName));

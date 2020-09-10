@@ -20,7 +20,7 @@ public class DemoController {
 
 
     @YRequestMapping("/hello")
-    public String hello(@YRequestParam String name, @YRequestParam String from) {
+    public String hello(@YRequestParam("name") String name, @YRequestParam("from") String from) {
         return demoService.hello(name, from);
     }
 }
