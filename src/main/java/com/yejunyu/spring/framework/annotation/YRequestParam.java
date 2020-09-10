@@ -1,4 +1,4 @@
-package com.yejunyu.mvcframework.annotation;
+package com.yejunyu.spring.framework.annotation;
 
 import java.lang.annotation.*;
 
@@ -8,9 +8,9 @@ import java.lang.annotation.*;
  * @email: yyyejunyu@gmail.com
  * @date: 2020/9/6
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface YService {
+public @interface YRequestParam {
     String value() default "";
 }

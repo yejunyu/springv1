@@ -7,7 +7,7 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
     <display-name>yejunyu Web Application</display-name>
     <servlet>
         <servlet-name>mySrping</servlet-name>
-        <servlet-class>com.yejunyu.mvcframework.servlet.MyDispatcherServlet</servlet-class>
+        <servlet-class>com.yejunyu.spring.framework.webmvc.servlet.MyDispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
             <param-value>application.properties</param-value>

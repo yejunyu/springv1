@@ -1,9 +1,9 @@
 package com.yejunyu.mvc;
 
-import com.yejunyu.mvcframework.annotation.YAutowire;
-import com.yejunyu.mvcframework.annotation.YController;
-import com.yejunyu.mvcframework.annotation.YRequestMapping;
-import com.yejunyu.mvcframework.annotation.YRequestParam;
+import com.yejunyu.spring.framework.annotation.YAutowire;
+import com.yejunyu.spring.framework.annotation.YController;
+import com.yejunyu.spring.framework.annotation.YRequestMapping;
+import com.yejunyu.spring.framework.annotation.YRequestParam;
 
 /**
  * @author: YeJunyu

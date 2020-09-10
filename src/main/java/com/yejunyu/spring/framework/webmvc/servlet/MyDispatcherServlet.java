@@ -1,6 +1,6 @@
-package com.yejunyu.mvcframework.servlet;
+package com.yejunyu.spring.framework.webmvc.servlet;
 
-import com.yejunyu.mvcframework.annotation.*;
+import com.yejunyu.spring.framework.annotation.*;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServlet;

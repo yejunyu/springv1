@@ -1,6 +1,6 @@
 package com.yejunyu.mvc;
 
-import com.yejunyu.mvcframework.annotation.YService;
+import com.yejunyu.spring.framework.annotation.YService;
 
 /**
  * @author: YeJunyu
