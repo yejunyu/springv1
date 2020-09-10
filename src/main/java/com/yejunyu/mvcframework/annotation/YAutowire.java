@@ -11,6 +11,6 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface YAutowired {
+public @interface YAutowire {
     String value() default "";
 }

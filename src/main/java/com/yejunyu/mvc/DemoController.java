@@ -1,6 +1,6 @@
 package com.yejunyu.mvc;
 
-import com.yejunyu.mvcframework.annotation.YAutowired;
+import com.yejunyu.mvcframework.annotation.YAutowire;
 import com.yejunyu.mvcframework.annotation.YController;
 import com.yejunyu.mvcframework.annotation.YRequestMapping;
 import com.yejunyu.mvcframework.annotation.YRequestParam;
@@ -15,7 +15,7 @@ import com.yejunyu.mvcframework.annotation.YRequestParam;
 @YRequestMapping("/y")
 public class DemoController {
 
-    @YAutowired
+    @YAutowire
     IDemoService demoService;
 
 

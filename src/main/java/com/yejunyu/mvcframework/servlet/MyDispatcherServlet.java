@@ -1,6 +1,8 @@
 package com.yejunyu.mvcframework.servlet;
 
+import com.yejunyu.mvcframework.annotation.YAutowire;
 import com.yejunyu.mvcframework.annotation.YController;
+import com.yejunyu.mvcframework.annotation.YRequestMapping;
 import com.yejunyu.mvcframework.annotation.YService;
 
 import javax.servlet.ServletConfig;
@@ -10,6 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 
@@ -27,14 +32,21 @@ public class MyDispatcherServlet extends HttpServlet {
 
     private List<String> classNameList = new ArrayList<>();
 
+    private Map<String, Method> handlerMapping = new HashMap<>();
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         this.doPost(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        doDispatch(req, resp);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            doDispatch(req, resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.getWriter().write("500 Exception :" + Arrays.toString(e.getStackTrace()));
+        }
     }
 
     /**
@@ -43,8 +55,25 @@ public class MyDispatcherServlet extends HttpServlet {
      * @param req
      * @param resp
      */
-    private void doDispatch(HttpServletRequest req, HttpServletResponse resp) {
+    private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws IOException, InvocationTargetException, IllegalAccessException {
         // 6. 根据 url调用具体的方法
+        String url = req.getRequestURI();
+        String contextPath = req.getContextPath();
+        System.out.println("url is :" + url + " contextPath is :" + contextPath);
+        url = ("/" + url).replaceAll(contextPath, "").replaceAll("/+", "");
+        Method method = handlerMapping.get(url);
+        if (method == null) {
+            resp.getWriter().write("404 NOT FOUND!");
+            return;
+        }
+        // 形参
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        // 实参
+        Object[] objects = new Object[parameterTypes.length];
+
+        // 拿出 method 的类名
+        String beanName = method.getDeclaringClass().getSimpleName();
+        method.invoke(ioc.get(beanName));
     }
 
     @Override
@@ -67,16 +96,63 @@ public class MyDispatcherServlet extends HttpServlet {
         System.out.println("Spring init finish~");
     }
 
+    /**
+     * 把 url 和 Controller 执行的方法映射起来
+     */
     private void doInitHandlerMapping() {
-
+        if (ioc.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, Object> entry : ioc.entrySet()) {
+            Class<?> aClass = entry.getValue().getClass();
+            if (!aClass.isAnnotationPresent(YController.class)) {
+                continue;
+            }
+            String baseUrl = "";
+            if (aClass.isAnnotationPresent(YRequestMapping.class)) {
+                YRequestMapping requestMapping = aClass.getAnnotation(YRequestMapping.class);
+                baseUrl = requestMapping.value();
+            }
+            Method[] methods = aClass.getMethods();
+            for (Method method : methods) {
+                if (!method.isAnnotationPresent(YRequestMapping.class)) {
+                    continue;
+                }
+                YRequestMapping requestMapping = method.getAnnotation(YRequestMapping.class);
+                String url = ("/" + baseUrl + "/" + requestMapping.value()).replaceAll("/+", "/");
+                handlerMapping.put(url, method);
+                System.out.println("Mapped url: " + url + "," + method);
+            }
+        }
     }
 
     private void doAutowire() {
         if (ioc.isEmpty()) {
             return;
         }
+        // @autowire Service service,相当于 Service service = new Service()
         for (Map.Entry<String, Object> entry : ioc.entrySet()) {
-            
+            // Controller 或者 service 里的属性
+            // 把 service 赋值 new Service()
+            Field[] fields = entry.getValue().getClass().getDeclaredFields();
+            for (Field field : fields) {
+                // 给有 autowire 注解的属性赋值
+                if (!field.isAnnotationPresent(YAutowire.class)) {
+                    continue;
+                }
+                YAutowire autowire = field.getAnnotation(YAutowire.class);
+                String beanName = autowire.value().trim();
+                if ("".equals(beanName)) {
+                    beanName = field.getType().getName();
+                }
+                // 一般都是私有属性,所以要加暴力访问
+                field.setAccessible(true);
+                try {
+                    field.set(entry.getValue(), ioc.get(beanName));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -103,9 +179,11 @@ public class MyDispatcherServlet extends HttpServlet {
                     // @autowire IService service 但是如果这个接口有多个实现类那就找不到是哪个了
                     for (Class<?> i : aClass.getInterfaces()) {
                         beanName = i.getSimpleName();
+                        System.out.println(beanName);
                         if (ioc.containsKey(beanName)) {
                             throw new Exception("the beanName is exists!");
                         }
+                        ioc.put(beanName, i.newInstance());
                     }
                     ioc.put(beanName, aClass.newInstance());
                 } else {
@@ -171,5 +249,9 @@ public class MyDispatcherServlet extends HttpServlet {
         // 变成文件才能解析
         File classPath = new File(url.getFile());
         System.out.println(classPath);
+        servlet.doScanner(scanPackage);
+        servlet.doInstance();
+        servlet.doAutowire();
+        servlet.doInitHandlerMapping();
     }
 }
